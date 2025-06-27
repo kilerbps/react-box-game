@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API - Mystery Box Game</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Test API - Mystery Box Game</h1>
+    
+    <div class="test info">
+        <h3>📋 Informations de configuration</h3>
+        <p><strong>Backend URL:</strong> <span id="backend-url">Chargement...</span></p>
+        <p><strong>Frontend URL:</strong> <span id="frontend-url">Chargement...</span></p>
+    </div>
+
+    <div class="test">
+        <h3>🧪 Tests de connexion</h3>
+        <button onclick="testHealth()">Test Health Check</button>
+        <button onclick="testCORS()">Test CORS</button>
+        <button onclick="testIdentityCheck()">Test Identity Check</button>
+        <div id="test-results"></div>
+    </div>
+
+    <div class="test">
+        <h3>📊 Logs de test</h3>
+        <pre id="logs"></pre>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://react-box-game.onrender.com';
+        const FRONTEND_URL = window.location.origin;
+        
+        document.getElementById('backend-url').textContent = API_BASE_URL;
+        document.getElementById('frontend-url').textContent = FRONTEND_URL;
+        
+        function log(message, type = 'info') {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            logs.textContent += `[${timestamp}] ${type.toUpperCase()}: ${message}\n`;
+            logs.scrollTop = logs.scrollHeight;
+        }
+        
+        function showResult(message, success = true) {
+            const results = document.getElementById('test-results');
+            const div = document.createElement('div');
+            div.className = success ? 'success' : 'error';
+            div.innerHTML = `<p>${message}</p>`;
+            results.appendChild(div);
+        }
+        
+        async function testHealth() {
+            log('Test Health Check...');
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/health`);
+                const data = await response.json();
+                log(`Health Check OK: ${response.status}`, 'success');
+                log(`Response: ${JSON.stringify(data, null, 2)}`, 'info');
+                showResult(`✅ Health Check réussi (${response.status})`);
+            } catch (error) {
+                log(`Health Check ERROR: ${error.message}`, 'error');
+                showResult(`❌ Health Check échoué: ${error.message}`, false);
+            }
+        }
+        
+        async function testCORS() {
+            log('Test CORS...');
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/health`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    mode: 'cors'
+                });
+                const data = await response.json();
+                log(`CORS OK: ${response.status}`, 'success');
+                showResult(`✅ CORS fonctionne (${response.status})`);
+            } catch (error) {
+                log(`CORS ERROR: ${error.message}`, 'error');
+                showResult(`❌ CORS échoué: ${error.message}`, false);
+            }
+        }
+        
+        async function testIdentityCheck() {
+            log('Test Identity Check...');
+            try {
+                const testData = {
+                    email: 'test@example.com',
+                    phone: '0612345678'
+                };
+                
+                const response = await fetch(`${API_BASE_URL}/api/check-identity`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData),
+                    mode: 'cors'
+                });
+                
+                const data = await response.json();
+                log(`Identity Check OK: ${response.status}`, 'success');
+                log(`Response: ${JSON.stringify(data, null, 2)}`, 'info');
+                showResult(`✅ Identity Check réussi (${response.status})`);
+            } catch (error) {
+                log(`Identity Check ERROR: ${error.message}`, 'error');
+                showResult(`❌ Identity Check échoué: ${error.message}`, false);
+            }
+        }
+        
+        // Test automatique au chargement
+        window.onload = function() {
+            log('Page chargée, démarrage des tests automatiques...');
+            setTimeout(testHealth, 1000);
+            setTimeout(testCORS, 2000);
+        };
+    </script>
+</body>
+</html> 

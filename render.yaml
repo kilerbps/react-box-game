@@ -1,0 +1,24 @@
+services:
+  # Service Backend
+  - type: web
+    name: mystery-box-backend
+    env: node
+    runtime: node
+    plan: free # ou "starter" pour plus de puissance
+    rootDir: backend
+    buildCommand: "npm install && npm run build"
+    startCommand: "npm start"
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: FRONTEND_URL
+        fromService:
+          type: web
+          name: mystery-box-frontend # Nom du service Vercel (à adapter)
+          envVarKey: VERCEL_URL # Variable d'environnement fournie par Vercel
+      # Render définit automatiquement la variable PORT
+
+# Note: Pour que `fromService` fonctionne, vous devrez peut-être créer un "External Service"
+# sur Render qui pointe vers votre URL Vercel, ou simplement entrer l'URL manuellement
+# dans les variables d'environnement sur le dashboard Render. 
